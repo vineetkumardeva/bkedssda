@@ -23,11 +23,9 @@ erDiagram
     USER ||--o{ EARNING : earns
     USER ||--o{ EARNING : "earns from"
 
-```mermaid
+```
 
 
-
-Database Schema
 git clone https://github.com/vineetkumardeva/bkedssda.git
 cd bkedssda
 python3 -m venv venv
