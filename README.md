@@ -1,7 +1,7 @@
 Multi-Level Referral System 
 A backend system for tracking multi-level referral earnings, built with FastAPI,SQLModel,SQLite and hosted on Replit.
 
-## 📊 Database Schema
+ Database Schema
 
 ```mermaid
 erDiagram
@@ -20,7 +20,7 @@ erDiagram
     }
     USER ||--o{ USER : refers
     USER ||--o{ EARNING : earns
-    USER ||--o{ EARNING : "earns from"
+    USER ||--o{ EARNING : earns from
 ```mermaid
 
 
