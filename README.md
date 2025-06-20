@@ -4,6 +4,7 @@ A backend system for tracking multi-level referral earnings, built with FastAPI,
  Database Schema
 
 ```mermaid
+
 erDiagram
     USER {
         int id PK
@@ -21,6 +22,7 @@ erDiagram
     USER ||--o{ USER : refers
     USER ||--o{ EARNING : earns
     USER ||--o{ EARNING : earns from
+
 ```mermaid
 
 
