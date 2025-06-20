@@ -154,4 +154,6 @@ json{
   ]
 }
  Database Schema
-```mermaid flowchart TB subgraph Purchase handling A[User makes a purchase (amount)] --> B{Is amount ≥ ₹1000?} B -- No --> C[Discard: No earnings recorded] B -- Yes --> D[Fetch Buyer info] end subgraph Referral hierarchy D --> E[Identify L1 (direct) referrer] D --> F[Identify L2 (indirect) referrer] end subgraph Profit distribution E -->|5% of amount| G[Create Earning record lvl 1] F -->|1% of amount| H[Create Earning record lvl 2] end subgraph Notifications G --> I[Notify if SSE/WebSocket connected] H --> I I -->|Yes| J[Push real‑time update to parent] I -->|No| K[Skip notification] end ``` 
+```mermaid 
+flowchart TB subgraph Purchase handling A[User makes a purchase (amount)] --> B{Is amount ≥ ₹1000?} B -- No --> C[Discard: No earnings recorded] B -- Yes --> D[Fetch Buyer info] end subgraph Referral hierarchy D --> E[Identify L1 (direct) referrer] D --> F[Identify L2 (indirect) referrer] end subgraph Profit distribution E -->|5% of amount| G[Create Earning record lvl 1] F -->|1% of amount| H[Create Earning record lvl 2] end subgraph Notifications G --> I[Notify if SSE/WebSocket connected] H --> I I -->|Yes| J[Push real‑time update to parent] I -->|No| K[Skip notification] end
+ ``` 
