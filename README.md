@@ -154,35 +154,4 @@ json{
   ]
 }
  Database Schema
-```mermaid
-flowchart TB
-  subgraph Database
-    U[User<br/>(id, name, referred_by)]
-    E[Earning<br/>(id, user_id, source_user_id, level, amount, timestamp)]
-  end
-
-  subgraph ReferralHierarchy
-    U -->|direct referrals| U2[User]
-    U2 -->|indirect referrals| U3[User]
-  end
-
-  subgraph ProfitDistribution
-    U2 -- 5% --> U
-    U3 -- 1% --> U
-  end
-
-  subgraph Validation
-    Purchase((Purchase))
-    Purchase -->|amount ≥ ₹1000| ProfitCalc{Is Valid?}
-    ProfitCalc -->|yes| ProfitDistribution
-    ProfitCalc -->|no| Discard[No earnings recorded]
-  end
-
-  subgraph RealTimeUpdates
-    ProfitDistribution -->|on earning logged| SSE[Event via SSE/WebSocket]
-    SSE -->|notify| U
-  end
-
-  click U href "https://github.com" "Represents a user in the system"
-  click E href "https://github.com" "Represents an earnings record per referral transaction"
-```
+```mermaid flowchart TB subgraph Purchase handling A[User makes a purchase (amount)] --> B{Is amount ≥ ₹1000?} B -- No --> C[Discard: No earnings recorded] B -- Yes --> D[Fetch Buyer info] end subgraph Referral hierarchy D --> E[Identify L1 (direct) referrer] D --> F[Identify L2 (indirect) referrer] end subgraph Profit distribution E -->|5% of amount| G[Create Earning record lvl 1] F -->|1% of amount| H[Create Earning record lvl 2] end subgraph Notifications G --> I[Notify if SSE/WebSocket connected] H --> I I -->|Yes| J[Push real‑time update to parent] I -->|No| K[Skip notification] end ``` 
