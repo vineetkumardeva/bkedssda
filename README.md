@@ -154,25 +154,35 @@ json{
   ]
 }
  Database Schema
-
 ```mermaid
+flowchart TB
+  subgraph Database
+    U[User<br/>(id, name, referred_by)]
+    E[Earning<br/>(id, user_id, source_user_id, level, amount, timestamp)]
+  end
 
-erDiagram
-    USER {
-        int id PK
-        string name
-        int referred_by FK
-    }
-    EARNING {
-        int id PK
-        int user_id FK
-        int source_user_id FK
-        int level
-        float amount
-        datetime timestamp
-    }
-    USER ||--o{ USER : refers
-    USER ||--o{ EARNING : earns
-    USER ||--o{ EARNING : "earns from"
+  subgraph ReferralHierarchy
+    U -->|direct referrals| U2[User]
+    U2 -->|indirect referrals| U3[User]
+  end
 
+  subgraph ProfitDistribution
+    U2 -- 5% --> U
+    U3 -- 1% --> U
+  end
+
+  subgraph Validation
+    Purchase((Purchase))
+    Purchase -->|amount ≥ ₹1000| ProfitCalc{Is Valid?}
+    ProfitCalc -->|yes| ProfitDistribution
+    ProfitCalc -->|no| Discard[No earnings recorded]
+  end
+
+  subgraph RealTimeUpdates
+    ProfitDistribution -->|on earning logged| SSE[Event via SSE/WebSocket]
+    SSE -->|notify| U
+  end
+
+  click U href "https://github.com" "Represents a user in the system"
+  click E href "https://github.com" "Represents an earnings record per referral transaction"
 ```
