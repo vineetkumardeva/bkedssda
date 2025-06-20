@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .earnings div { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <div class="earnings">
+    <div>Total: ₹<span id="total">0</span></div>
+    <div>Level 1: ₹<span id="lvl1">0</span></div>
+    <div>Level 2: ₹<span id="lvl2">0</span></div>
+  </div>
+  <button id="test-purchase">Test Purchase</button>
+  <script>
+    const total = document.getElementById('total'),
+          lvl1 = document.getElementById('lvl1'),
+          lvl2 = document.getElementById('lvl2');
+    document.getElementById('test-purchase').onclick = () => {
+      fetch('/purchase?buyer_id=1&amount=1500', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          const sums = {1:0,2:0};
+          data.distributed?.forEach(([uid, amt, lvl]) => sums[lvl]+= amt);
+          lvl1.textContent = sums[1];
+          lvl2.textContent = sums[2];
+          total.textContent = sums[1] + sums[2];
+        })
+        .catch(console.error);
+    };
+
+    const evt = new EventSource('/events/1');
+    evt.onmessage = e => {
+      const { amount, level } = JSON.parse(e.data);
+      const el = level === 1 ? lvl1 : lvl2;
+      el.textContent = +el.textContent + amount;
+      total.textContent = +total.textContent + amount;
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Referrals</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    ul { list-style-type: none; padding: 0; }
+    li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>Your Referrals</h1>
+  <h2>Direct Referrals</h2>
+  <ul id="direct"></ul>
+  <h2>Indirect Referrals</h2>
+  <ul id="indirect"></ul>
+
+  <script>
+    fetch('/referrals/1')
+      .then(response => response.json())
+      .then(data => {
+        const directList = document.getElementById('direct');
+        const indirectList = document.getElementById('indirect');
+
+        data.direct_referrals.forEach(referral => {
+          const li = document.createElement('li');
+          li.textContent = `ID: ${referral.id}, Name: ${referral.name}`;
+          directList.appendChild(li);
+        });
+
+        data.indirect_referrals.forEach(referral => {
+          const li = document.createElement('li');
+          li.textContent = `ID: ${referral.id}, Name: ${referral.name}, Referred By: ${referral.via}`;
+          indirectList.appendChild(li);
+        });
+      })
+      .catch(error => console.error('Error fetching referrals:', error));
+  </script>
+</body>
+</html>
