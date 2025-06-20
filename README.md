@@ -5,25 +5,26 @@ A backend system for tracking multi-level referral earnings, built with FastAPI,
 
 ```mermaid
 erDiagram
-    User {
-        integer id PK
+    USER {
+        int id PK
         string name
-        integer referred_by FK
+        int referred_by FK
     }
-    Earning {
-        integer id PK
-        integer user_id FK
-        integer source_user_id FK
-        integer level
+    EARNING {
+        int id PK
+        int user_id FK
+        int source_user_id FK
+        int level
         float amount
         datetime timestamp
     }
-    User ||--o{ User : refers
-    User ||--o{ Earning : "earns"
-    User ||--o{ Earning : "earns_from"
+    USER ||--o{ USER : refers
+    USER ||--o{ EARNING : earns
+    USER ||--o{ EARNING : "earns from"
 
 
 
+Database Schema
 git clone https://github.com/vineetkumardeva/bkedssda.git
 cd bkedssda
 python3 -m venv venv
