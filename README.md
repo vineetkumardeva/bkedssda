@@ -154,6 +154,44 @@ json{
   ]
 }
  Database Schema
-```mermaid 
-flowchart TB subgraph Purchase handling A[User makes a purchase (amount)] --> B{Is amount ≥ ₹1000?} B -- No --> C[Discard: No earnings recorded] B -- Yes --> D[Fetch Buyer info] end subgraph Referral hierarchy D --> E[Identify L1 (direct) referrer] D --> F[Identify L2 (indirect) referrer] end subgraph Profit distribution E -->|5% of amount| G[Create Earning record lvl 1] F -->|1% of amount| H[Create Earning record lvl 2] end subgraph Notifications G --> I[Notify if SSE/WebSocket connected] H --> I I -->|Yes| J[Push real‑time update to parent] I -->|No| K[Skip notification] end
- ``` 
+```mermaid
+erDiagram
+
+  USERS {
+    UUID id PK
+    STRING name
+    STRING email
+    STRING phone
+    UUID referred_by FK "Self reference to parent user"
+    INT referral_level "Depth in referral tree"
+    BOOLEAN is_active
+    TIMESTAMP created_at
+    TIMESTAMP updated_at
+  }
+
+  EARNINGS {
+    UUID id PK
+    UUID user_id FK
+    UUID source_user_id FK "Referral who triggered earning"
+    FLOAT amount
+    FLOAT percentage
+    STRING type "Direct, Indirect, Bonus"
+    TEXT description
+    TIMESTAMP created_at
+  }
+
+  TRANSACTIONS {
+    UUID id PK
+    UUID user_id FK
+    FLOAT amount
+    BOOLEAN is_valid "True if amount > 1000"
+    TEXT note
+    TIMESTAMP created_at
+  }
+
+  USERS ||--o{ USERS : referred_by
+  USERS ||--o{ EARNINGS : user_id
+  USERS ||--o{ EARNINGS : source_user_id
+  USERS ||--o{ TRANSACTIONS : user_id
+  
+```
