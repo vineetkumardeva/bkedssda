@@ -1,26 +1,29 @@
 Multi-Level Referral System 
 A backend system for tracking multi-level referral earnings, built with FastAPI,SQLModel,SQLite and hosted on Replit.
 
+## 📊 Database Schema
+
+```mermaid
 erDiagram
-User {
-    integer id PK
-    string name
-    integer referred_by FK
-}
-Earning {
-    integer id PK
-    integer user_id FK
-    integer source_user_id FK
-    integer level
-    float amount
-    datetime timestamp
-}
-User ||--o{ User : refers
-User ||--o{ Earning : "earns"
-User ||--o{ Earning : "earns_from"
+    User {
+        integer id PK
+        string name
+        integer referred_by FK
+    }
+    Earning {
+        integer id PK
+        integer user_id FK
+        integer source_user_id FK
+        integer level
+        float amount
+        datetime timestamp
+    }
+    User ||--o{ User : refers
+    User ||--o{ Earning : "earns"
+    User ||--o{ Earning : "earns_from"
 
 
-```bash
+
 git clone https://github.com/vineetkumardeva/bkedssda.git
 cd bkedssda
 python3 -m venv venv
