@@ -21,6 +21,7 @@ erDiagram
     USER ||--o{ USER : refers
     USER ||--o{ EARNING : earns
     USER ||--o{ EARNING : "earns from"
+```mermaid
 
 
 
