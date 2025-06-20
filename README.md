@@ -148,11 +148,11 @@ json{
   "direct_referrals": [
     {"id":2,"name":"Bob"},
     {"id":3,"name":"Charlie"}
-  ],
   "indirect_referrals": [
     {"id":4,"name":"Dave","via":2}
-  ]
+  
 }
+
  Database Schema
 ```mermaid
 erDiagram
