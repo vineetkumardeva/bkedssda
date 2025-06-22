@@ -2,8 +2,8 @@ Multi-Level Referral System with Real-Time Earnings
 
 A FastAPI backend system for managing a multi-level referral program with real-time earning notifications, built on SQLModel and SQLite, featuring live updates via Server-Sent Events (SSE).
 
-Features
-Referral System
+Features:-
+Referral System:
 Users can refer up to 8 direct referrals.
 Referral hierarchy supports direct (level 1) and indirect (level 2) earnings.
 Users status can be set active/inactive to control commission eligibility.
@@ -16,21 +16,22 @@ Commission split:
 Each user can earn a maximum of ₹1000 commission per level.
 Earnings and transactions are logged with timestamps.
 
-Real-Time Updates
+Real-Time Updates:
 Users receive live commission updates via Server-Sent Events (SSE).
 Frontend dashboard listens for updates without page refresh.
 
-API Endpoints
+API Endpoints:-
 Create users, refer users, record purchases.
 Get referral lists (direct & indirect).
 Get earnings summaries and breakdowns.
 Deactivate/reactivate users to control commission eligibility.
 Real-time event stream for earnings updates.
 
-Data Model
-User: Supports referral hierarchy and active status.
-Earning: Tracks earnings by user, source, and referral level.
-Transaction: Logs purchase transactions with validation.
+Data Model:
+User table stores user info, referral relationships, active status. Fields: id, name, referred_by, is_active
+Earning	table logs earnings by user, referral level, and source user. Fields: user_id, source_user_id, level, amount, timestamp
+Transaction	table logs purchase transactions with validity and notes. Fields: user_id, amount, is_valid, note, timestamp
+
 
 Installation & Setup
 ```bash
@@ -95,7 +96,6 @@ Response:
       "amount": 100.0,
       "timestamp": "2025-06-23T10:00:12.345Z"
     },
-    ...
   ]
 }
 ```
@@ -126,22 +126,18 @@ Example Response:
 [
   { "user_id": 1, "name": "Alice", "total_earnings": 765.5 },
   { "user_id": 2, "name": "Bob", "total_earnings": 645.0 },
-  ...
+ 
 ]
 ```
-Frontend
+Frontend:-
 
 Dashboard (static/index.html): Shows live total earnings and level-wise breakdown, allows simulating purchases.Visualizations include a Bar Chart showing earnings by referral level to give a quick comparative view and a Live-updating counters for total earnings and each referral level’s earnings.
 
 Referrals Viewer (static/referrals.html): Displays direct and indirect referrals for a user in a nested-bullet format. Active users are green while inactive users are red.
 
-Data Model Details
-Table	Description
-User	Stores user info, referral relationships, active status. Fields: id, name, referred_by, is_active
-Earning	Logs earnings by user, referral level, and source user. Fields: user_id, source_user_id, level, amount, timestamp
-Transaction	Logs purchase transactions with validity and notes. Fields: user_id, amount, is_valid, note, timestamp
 
-Architecture & Design Notes
+Architecture & Design Notes:-
+
 Referral Limit: Each user can have up to 8 direct referrals.
 Earnings Cap: Users can earn up to ₹1000 per level.
 Inactive Users: Do not receive commissions.
@@ -149,17 +145,20 @@ Real-Time Updates: Implemented using SSE and asyncio queues.
 Database: SQLite via SQLModel with relationships and foreign keys.
 Security & Validation: Basic validation on inputs and purchase thresholds.
 
-Development Notes
+Development Notes :-
+
 Uses FastAPI lifespan event to create DB tables on startup.
 Implements self-referential relationship on User for referrals.
 SQLAlchemy core functions used for aggregation (sum of earnings).
 SSE queue dictionary indexed by user_id for notifications.
 
-SSE Engine Details
+SSE Engine Details:-
+
 The system uses asyncio queues and SSE (Server-Sent Events) to provide live earnings updates:
 Each user has a queue (in-memory) identified by their user_id.
 When a qualifying purchase happens:
 Referrers (level 1 and level 2) receive data like:
+
 ```json
 {
   "amount": 75.00,
