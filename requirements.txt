@@ -2,3 +2,4 @@ fastapi
 uvicorn
 sqlmodel==0.0.22
 sse-starlette
+sqlalchemy

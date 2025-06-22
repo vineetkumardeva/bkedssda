@@ -17,29 +17,44 @@
   </div>
   <button id="test-purchase">Test Purchase</button>
   <script>
+    // Extract user_id from URL query params like ?user_id=1
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('user_id');
+
+    if (!userId) {
+      alert("Missing user_id in URL. Use ?user_id=1");
+      throw new Error("No user_id in URL");
+    }
+
     const total = document.getElementById('total'),
           lvl1 = document.getElementById('lvl1'),
           lvl2 = document.getElementById('lvl2');
+
     document.getElementById('test-purchase').onclick = () => {
-      fetch('/purchase?buyer_id=1&amount=1500', { method: 'POST' })
+      fetch(`/purchase?buyer_id=${userId}&amount=1500`, { method: 'POST' })
         .then(res => res.json())
         .then(data => {
-          const sums = {1:0,2:0};
-          data.distributed?.forEach(([uid, amt, lvl]) => sums[lvl]+= amt);
+          const sums = {1:0, 2:0};
+          data.distributed?.forEach(([uid, amt, lvl]) => sums[lvl] += amt);
           lvl1.textContent = sums[1];
           lvl2.textContent = sums[2];
-          total.textContent = sums[1] + sums[2];
+          total.textContent = (sums[1] + sums[2]).toFixed(2);
         })
         .catch(console.error);
     };
 
-    const evt = new EventSource('/events/1');
+    const evt = new EventSource(`/events/${userId}`);
     evt.onmessage = e => {
-      const { amount, level } = JSON.parse(e.data);
-      const el = level === 1 ? lvl1 : lvl2;
-      el.textContent = +el.textContent + amount;
-      total.textContent = +total.textContent + amount;
+      try {
+        const { amount, level } = JSON.parse(e.data);
+        const el = level === 1 ? lvl1 : lvl2;
+        el.textContent = (+el.textContent + amount).toFixed(2);
+        total.textContent = (+total.textContent + amount).toFixed(2);
+      } catch (err) {
+        console.error("SSE parse error", err, e.data);
+      }
     };
   </script>
+
 </body>
 </html>
