@@ -30,7 +30,6 @@ Real-time event stream for earnings updates.
 Data Model
 User: Supports referral hierarchy and active status.
 Earning: Tracks earnings by user, source, and referral level.
-
 Transaction: Logs purchase transactions with validation.
 
 Installation & Setup
@@ -79,6 +78,28 @@ Retrieve total and level-wise earnings for a user.
 ```http
 GET /earnings/{user_id}
 ```
+Response:
+```json
+
+{
+  "user_id": 2,
+  "total_earnings": 430.0,
+  "earnings_by_level": {
+    "1": 350.0,
+    "2": 80.0
+  },
+  "details": [
+    {
+      "source_user_id": 5,
+      "level": 1,
+      "amount": 100.0,
+      "timestamp": "2025-06-23T10:00:12.345Z"
+    },
+    ...
+  ]
+}
+```
+
 6. Real-Time Earnings Updates (SSE)
 Subscribe to live earnings events for a user.
 Stream updates whenever new commissions are credited.
@@ -86,21 +107,39 @@ Stream updates whenever new commissions are credited.
 ```http
 GET /events/{user_id}
 ```
+
 7. User Status Management
 Deactivate or reactivate users to control commission eligibility.
 ```http
 PATCH /user/{user_id}/deactivate
 PATCH /user/{user_id}/reactivate
 ```
+8. Leaderboard (Top Earners)
+Returns the top 10 users with the highest total earnings.
+
+```http
+GET /leaderboard
+```
+
+Example Response:
+```json
+[
+  { "user_id": 1, "name": "Alice", "total_earnings": 765.5 },
+  { "user_id": 2, "name": "Bob", "total_earnings": 645.0 },
+  ...
+]
+```
 Frontend
-Dashboard (static/index.html): Shows live total earnings and level-wise breakdown, allows simulating purchases.
-Referrals Viewer (static/referrals.html): Displays direct and indirect referrals for a user.
+
+Dashboard (static/index.html): Shows live total earnings and level-wise breakdown, allows simulating purchases.Visualizations include a Bar Chart showing earnings by referral level to give a quick comparative view and a Live-updating counters for total earnings and each referral level’s earnings.
+
+Referrals Viewer (static/referrals.html): Displays direct and indirect referrals for a user in a nested-bullet format. Active users are green while inactive users are red.
 
 Data Model Details
 Table	Description
-User	Stores user info, referral relationships, active status.
-Earning	Logs earnings by user, referral level, and source user.
-Transaction	Logs purchase transactions with validity and notes.
+User	Stores user info, referral relationships, active status. Fields: id, name, referred_by, is_active
+Earning	Logs earnings by user, referral level, and source user. Fields: user_id, source_user_id, level, amount, timestamp
+Transaction	Logs purchase transactions with validity and notes. Fields: user_id, amount, is_valid, note, timestamp
 
 Architecture & Design Notes
 Referral Limit: Each user can have up to 8 direct referrals.
@@ -115,6 +154,24 @@ Uses FastAPI lifespan event to create DB tables on startup.
 Implements self-referential relationship on User for referrals.
 SQLAlchemy core functions used for aggregation (sum of earnings).
 SSE queue dictionary indexed by user_id for notifications.
+
+SSE Engine Details
+The system uses asyncio queues and SSE (Server-Sent Events) to provide live earnings updates:
+Each user has a queue (in-memory) identified by their user_id.
+When a qualifying purchase happens:
+Referrers (level 1 and level 2) receive data like:
+```json
+{
+  "amount": 75.00,
+  "level": 1
+}
+```
+Frontend JavaScript (EventSource) listens to /events/{user_id} and updates the dashboard in real time.
+
+
+
+
+
 
 
 ```mermaid

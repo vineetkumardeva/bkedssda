@@ -6,7 +6,9 @@
   <style>
     body { font-family: Arial; margin: 20px; }
     .earnings div { margin-bottom: 10px; }
+    canvas { margin-top: 20px; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <h1>Dashboard</h1>
@@ -16,8 +18,12 @@
     <div>Level 2: ₹<span id="lvl2">0</span></div>
   </div>
   <button id="test-purchase">Test Purchase</button>
+
+  <h2>Earnings Visualization</h2>
+  <canvas id="levelChart" width="400" height="200"></canvas>
+  <canvas id="timelineChart" width="400" height="200"></canvas>
+
   <script>
-    // Extract user_id from URL query params like ?user_id=1
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user_id');
 
@@ -30,6 +36,63 @@
           lvl1 = document.getElementById('lvl1'),
           lvl2 = document.getElementById('lvl2');
 
+    let levelChart, timelineChart;
+
+    function renderLevelChart(levelData) {
+      if (levelChart) levelChart.destroy();
+      levelChart = new Chart(document.getElementById('levelChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Level 1 Earnings', 'Level 2 Earnings'],
+          datasets: [{
+            data: [levelData[1], levelData[2]],
+            backgroundColor: ['#4caf50', '#2196f3']
+          }]
+        },
+        options: {
+          plugins: { title: { display: true, text: 'Earnings by Level' } }
+        }
+      });
+    }
+
+    function renderTimelineChart(history) {
+      if (timelineChart) timelineChart.destroy();
+
+      const labels = history.map(e => new Date(e.timestamp).toLocaleString());
+      const amounts = history.map(e => e.amount);
+
+      timelineChart = new Chart(document.getElementById('timelineChart'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Earnings Over Time',
+            data: amounts,
+            fill: false,
+            borderColor: '#f44336',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { title: { display: true, text: 'Earnings Timeline' } },
+          scales: {
+            x: { ticks: { autoSkip: true, maxTicksLimit: 10 } },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function fetchEarnings() {
+      fetch(`/earnings/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          renderLevelChart(data.earnings_by_level);
+          renderTimelineChart(data.details);
+        });
+    }
+
     document.getElementById('test-purchase').onclick = () => {
       fetch(`/purchase?buyer_id=${userId}&amount=1500`, { method: 'POST' })
         .then(res => res.json())
@@ -39,6 +102,7 @@
           lvl1.textContent = sums[1];
           lvl2.textContent = sums[2];
           total.textContent = (sums[1] + sums[2]).toFixed(2);
+          fetchEarnings();
         })
         .catch(console.error);
     };
@@ -50,11 +114,13 @@
         const el = level === 1 ? lvl1 : lvl2;
         el.textContent = (+el.textContent + amount).toFixed(2);
         total.textContent = (+total.textContent + amount).toFixed(2);
+        fetchEarnings();
       } catch (err) {
         console.error("SSE parse error", err, e.data);
       }
     };
-  </script>
 
+    fetchEarnings();
+  </script>
 </body>
 </html>

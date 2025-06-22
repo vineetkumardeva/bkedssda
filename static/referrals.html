@@ -1,42 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Your Referrals</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     h1 { color: #333; }
-    ul { list-style-type: none; padding: 0; }
+    ul { list-style-type: none; padding-left: 20px; }
     li { margin: 5px 0; }
+    .active { color: green; }
+    .inactive { color: red; }
+    .level-1 > span { font-weight: bold; }
+    .level-2 { margin-left: 20px; font-style: italic; }
   </style>
 </head>
 <body>
   <h1>Your Referrals</h1>
-  <h2>Direct Referrals</h2>
-  <ul id="direct"></ul>
-  <h2>Indirect Referrals</h2>
-  <ul id="indirect"></ul>
+
+  <div id="referral-tree"></div>
 
   <script>
-    fetch('/referrals/1')
-      .then(response => response.json())
-      .then(data => {
-        const directList = document.getElementById('direct');
-        const indirectList = document.getElementById('indirect');
+    async function fetchReferrals(userId) {
+      const res = await fetch(`/referrals/${userId}`);
+      if (!res.ok) {
+        console.error('Failed to fetch referrals');
+        return;
+      }
+      return await res.json();
+    }
 
-        data.direct_referrals.forEach(referral => {
-          const li = document.createElement('li');
-          li.textContent = `ID: ${referral.id}, Name: ${referral.name}`;
-          directList.appendChild(li);
-        });
+    function createUserNode(user, level) {
+      const li = document.createElement('li');
+      li.classList.add(`level-${level}`);
 
-        data.indirect_referrals.forEach(referral => {
-          const li = document.createElement('li');
-          li.textContent = `ID: ${referral.id}, Name: ${referral.name}, Referred By: ${referral.via}`;
-          indirectList.appendChild(li);
-        });
-      })
-      .catch(error => console.error('Error fetching referrals:', error));
+      const statusClass = user.is_active ? 'active' : 'inactive';
+      li.innerHTML = `
+        <span class="${statusClass}">
+          ID: ${user.id}, Name: ${user.name} (${user.is_active ? 'Active' : 'Inactive'})
+        </span>
+      `;
+      return li;
+    }
+
+    async function buildTree(userId) {
+      const data = await fetchReferrals(userId);
+      if (!data) return;
+
+      const container = document.getElementById('referral-tree');
+      container.innerHTML = '';
+
+      const rootTitle = document.createElement('h2');
+      rootTitle.textContent = `Referrals for User ID: ${userId}`;
+      container.appendChild(rootTitle);
+
+      // Create top-level list for direct referrals
+      const ulDirect = document.createElement('ul');
+
+      data.direct_referrals.forEach(directUser => {
+        const liDirect = createUserNode(directUser, 1);
+
+        // Find indirect referrals referred by this direct user
+        const indirectForThisUser = data.indirect_referrals.filter(
+          indirectUser => indirectUser.via === directUser.id
+        );
+
+        if (indirectForThisUser.length > 0) {
+          const ulIndirect = document.createElement('ul');
+          indirectForThisUser.forEach(indirectUser => {
+            const liIndirect = createUserNode(indirectUser, 2);
+            ulIndirect.appendChild(liIndirect);
+          });
+          liDirect.appendChild(ulIndirect);
+        }
+        ulDirect.appendChild(liDirect);
+      });
+
+      container.appendChild(ulDirect);
+    }
+
+    // Hardcoded user id = 1, or parse from query string as in index.html if you want
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('user_id') || '1';
+
+    buildTree(userId);
   </script>
 </body>
 </html>
