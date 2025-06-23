@@ -131,9 +131,10 @@ Example Response:
 ```
 Frontend:-
 
-Dashboard (static/index.html): Shows live total earnings and level-wise breakdown, allows simulating purchases.Visualizations include a Bar Chart showing earnings by referral level to give a quick comparative view and a Live-updating counters for total earnings and each referral level’s earnings.
+Dashboard (static/index.html): Shows live total earnings and level-wise breakdown, allows simulating purchases.Visualizations include a Bar Chart showing earnings by referral level to give a quick comparative view and a Live-updating counters for total earnings and each referral level’s earnings.A Timeline Line Chart Shows earnings progression over time and a Bar Chart helps visualize earnings from each individual referral (by user ID).
 
-Referrals Viewer (static/referrals.html): Displays direct and indirect referrals for a user in a nested-bullet format. Active users are green while inactive users are red.
+
+Referrals Viewer (static/referrals.html): Displays direct and indirect referrals for a user in a nested-bullet format. Earnings per referral are displayed next to user name and active users are color-coded green while inactive users are red.
 
 
 Architecture & Design Notes:-

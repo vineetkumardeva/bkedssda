@@ -36,11 +36,12 @@
       const statusClass = user.is_active ? 'active' : 'inactive';
       li.innerHTML = `
         <span class="${statusClass}">
-          ID: ${user.id}, Name: ${user.name} (${user.is_active ? 'Active' : 'Inactive'})
+          ID: ${user.id}, Name: ${user.name} (${user.is_active ? 'Active' : 'Inactive'}) - ₹${(user.earned || 0).toFixed(2)}
         </span>
       `;
       return li;
     }
+
 
     async function buildTree(userId) {
       const data = await fetchReferrals(userId);

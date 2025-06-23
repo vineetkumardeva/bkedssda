@@ -148,15 +148,36 @@ def get_referrals(user_id: int):
             children = session.exec(select(User).where(User.referred_by == u.id)).all()
             indirect.extend(children)
 
+        # NEW: Map of earnings from each source_user_id
+        from collections import defaultdict
+        earning_map = defaultdict(float)
+        earnings = session.exec(select(Earning).where(Earning.user_id == user_id)).all()
+        for e in earnings:
+            earning_map[e.source_user_id] += e.amount
+
     return {
         "user_id": user_id,
         "direct_referrals": [
-            {"id": u.id, "name": u.name, "is_active": u.is_active} for u in direct
+            {
+                "id": u.id,
+                "name": u.name,
+                "is_active": u.is_active,
+                "earned": earning_map.get(u.id, 0)
+            }
+            for u in direct
         ],
         "indirect_referrals": [
-            {"id": u.id, "name": u.name, "via": u.referred_by, "is_active": u.is_active} for u in indirect
+            {
+                "id": u.id,
+                "name": u.name,
+                "via": u.referred_by,
+                "is_active": u.is_active,
+                "earned": earning_map.get(u.id, 0)
+            }
+            for u in indirect
         ]
     }
+    
 @app.get("/leaderboard")
 def get_leaderboard():
     with Session(engine) as session:

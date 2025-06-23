@@ -23,6 +23,10 @@
   <canvas id="levelChart" width="400" height="200"></canvas>
   <canvas id="timelineChart" width="400" height="200"></canvas>
 
+  <h2>Earnings by Source User</h2>
+  <canvas id="sourceChart" width="400" height="200"></canvas>
+
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user_id');
@@ -83,6 +87,39 @@
         }
       });
     }
+    let sourceChart;
+
+    function renderSourceChart(history) {
+      if (sourceChart) sourceChart.destroy();
+
+      const earningsByUser = {};
+      history.forEach(e => {
+        earningsByUser[e.source_user_id] = (earningsByUser[e.source_user_id] || 0) + e.amount;
+      });
+
+      const labels = Object.keys(earningsByUser);
+      const data = Object.values(earningsByUser);
+
+      sourceChart = new Chart(document.getElementById('sourceChart'), {
+        type: 'bar',
+        data: {
+          labels: labels.map(id => `User ${id}`),
+          datasets: [{
+            label: 'Earnings per Referred User',
+            data: data,
+            backgroundColor: '#673ab7'
+          }]
+        },
+        options: {
+          plugins: {
+            title: { display: true, text: 'Earnings by Referred Users' }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
 
     function fetchEarnings() {
       fetch(`/earnings/${userId}`)
@@ -90,6 +127,7 @@
         .then(data => {
           renderLevelChart(data.earnings_by_level);
           renderTimelineChart(data.details);
+          renderSourceChart(data.details); 
         });
     }
 
